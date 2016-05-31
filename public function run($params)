@@ -1,0 +1,35 @@
+public function run($params)
+   {
+
+try {
+
+       $options = isset($params['options']) ? $params['options'] : array();
+       $this->baseInit($options);
+       Mage::register('application_params', $params);
+
+       if ($this->_cache->processRequest()) {
+           $this->getResponse()->sendResponse();
+       } else {
+           $this->_initModules();
+           $this->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
+
+           if ($this->_config->isLocalConfigLoaded()) {
+               $scopeCode = isset($params['scope_code']) ? $params['scope_code'] : '';
+               $scopeType = isset($params['scope_type']) ? $params['scope_type'] : 'store';
+               $this->_initCurrentStore($scopeCode, $scopeType);
+               $this->_initRequest();
+               Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
+           }
+
+           $this->getFrontController()->dispatch();
+       }
+
+} catch (Exception $e) {
+
+var_dump($e);
+exit();
+}
+
+
+       return $this;
+   }
